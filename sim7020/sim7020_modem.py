@@ -83,7 +83,10 @@ class SIM7020Modem:
         while(time() - startTime < timeout_s):
             data += self.atRead()
             if(data != "" and data.endswith(lastChar)):
-                return int(data[:-1])
+                try:#有可能失敗，讓他包起來不要出錯
+                    return int(data[:-1])
+                except IndexError:
+                    return -9999 #跳過這次，重新一次
         return -9999
 
     def streamGetStringBefore(self, lastChar, timeout_s=1):

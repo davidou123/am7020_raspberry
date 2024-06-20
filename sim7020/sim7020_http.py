@@ -22,8 +22,7 @@ class SIM7020HTTP():
 
     def newHTTP(self):
         # Create a HTTP Client Instance. refer AT CMD 8.2.1
-        self.nb.sendAT("+CHTTPCREATE=\"http://", self.host, "\",\"",
-                       self.username, "\",\"", self.password, "\"")
+        self.nb.sendAT("+CHTTPCREATE=\"http://"+self.host+"/\",\"",self.username, "\",\"",self.password, "\"")
         return (self.nb.waitResponse(30, "+CHTTPCREATE: 0") == 1 and self.nb.waitResponse() == 1)
 
     def chkHTTPChOpen(self):
@@ -59,13 +58,15 @@ class SIM7020HTTP():
 
     def sendHTTPData(self, method, path, header, content_type, content_string):
         # Send HTTP(S) Package. refer AT CMD 8.2.6
-        self.nb.sendAT("+CHTTPSEND=0,", method, ",\"", path, "\",\"",
-                       header, "\",\"", content_type, "\",\"", content_string, "\"")
+        self.nb.sendAT("+CHTTPSEND=0,", method,",\"",path,"\",\""+header+"\",\""+content_type+"\",\""+content_string+"\"")
+        print("+CHTTPSEND=0,",method,",\""+path+"\",\""+header+"\",\""+content_type+"\",\""+content_string+"\"")
         return (self.nb.waitResponse(10) == 1)
 
     def startRequest(self, path, method, headers="", content_type="", body=""):
         if(self.connServer()):
             temp_header = self.makeHeader("Host", self.host)
+            #temp_header += self.makeHeader("Connection", "keep-alive")
+            #temp_header += self.makeHeader("Accept-Encoding", "gzip, deflate")
             if(headers != ""):
                 for header in headers:
                     temp_header += self.makeHeader(header, headers[header])
@@ -87,7 +88,7 @@ class SIM7020HTTP():
         return ""
 
     def makeHeader(self, key, value):
-        return (str(key) + ":" + str(value) + "\n")
+        return (str(key) + ":" + str(value) + "\r\n")  #修正header換行相容問題
 
     def connServer(self):
         endTime = time() + CONN_BROKER_TIMEOUT_MS

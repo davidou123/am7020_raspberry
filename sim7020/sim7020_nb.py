@@ -52,7 +52,10 @@ class SIM7020NB(SIM7020Modem):
         # EPS Network Registration Status. refer AT CMD 3.2.47
         self.sendAT("+CEREG?")
         self.waitResponse(1, "+CEREG: 0,")
-        status = self.streamGetIntBefore('\n')
+        try:
+            status = self.streamGetIntBefore('\r')
+        except IndexError:
+            return False#跳過這次迴圈，重新while一次
         self.waitResponse()
         return (status == 1)
 
